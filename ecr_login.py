@@ -7,17 +7,14 @@ def main():
   p.add_argument('--region', required=True)
   p.add_argument('--account', required=True)
   p.add_argument('--role-arn', required=True)
-  p.add_argument('--access-key-id', required=True)
-  p.add_argument('--secret-access-key', required=True)
+  p.add_argument('--access-key-id', required=False)
+  p.add_argument('--secret-access-key', required=False)
 
   args = p.parse_args()
 
 
 def ecr_login(account, region, access_key_id, secret_access_key, role_arn):
-  sts = boto3.client('sts',
-    aws_access_key_id=access_key_id,
-    aws_secret_access_key=secret_access_key
-  )
+  sts = get_sts_client(access_key_id, secret_access_key)
 
   assumed = sts.assume_role(
     RoleArn=role_arn,
@@ -46,6 +43,15 @@ def ecr_login(account, region, access_key_id, secret_access_key, role_arn):
   client.login(username='AWS', password=password, registry=endpoint)
 
   return client
+
+def get_sts_client(access_key_id, secret_access_key):
+  if not access_key_id or not secret_access_key:
+    return boto3.client('sts')
+
+  return boto3.client('sts',
+    aws_access_key_id=access_key_id,
+    aws_secret_access_key=secret_access_key
+  )
 
 if __name__ == '__main__':
   main()

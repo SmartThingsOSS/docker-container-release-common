@@ -1,0 +1,29 @@
+version: 2
+jobs:
+ build-master:
+   machine: true
+   steps:
+     - checkout
+     - run: |
+         ./build.sh --user=$DOCKER_USER --password=$DOCKER_PASSWORD --version=latest
+ build-tag:
+   machine: true
+   steps:
+     - checkout
+     - run: |
+         export VERSION=$(echo "$CIRCLE_TAG" | grep "^v.*$" | cut -c 2-);
+         if [ -z "$VERSION" ]; then exit 1; fi
+         ./build.sh --user=$DOCKER_USER --password=$DOCKER_PASSWORD --version=$VERSION
+
+workflows:
+  version: 2
+  build-deploy:
+    jobs:
+      - build-master:
+          filters:
+            branches:
+              only: master
+      - build-tag:
+          filters:
+            tags:
+              only: /^v.*/
