@@ -11,8 +11,8 @@ def main():
   p.add_argument('--bucket', required=True)
   p.add_argument('--files', nargs='+', required=True)
   p.add_argument('--role-arn', required=True)
-  p.add_argument('--access-key-id', required=True)
-  p.add_argument('--secret-access-key', required=True)
+  p.add_argument('--access-key-id', required=False)
+  p.add_argument('--secret-access-key', required=False)
 
   args = p.parse_args()
 
@@ -50,8 +50,8 @@ def upload(bucket, team, app, version, files, role_arn, access_key_id, secret_ac
   s3 = login(access_key_id, secret_access_key, role_arn)
   for file in files:
     with open(file, 'r') as data:
-      # team / app / version / system / file
-      path = "%s/%s/%s/system/%s" % (team, app, version, file)
+      # config / $team / $app / $version / system / $file
+      path = "config/%s/%s/%s/system/%s" % (team, app, version, file)
       s3.put_object(Bucket=bucket, Key=path, Body=data)
 
 if __name__ == '__main__':
